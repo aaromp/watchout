@@ -23,11 +23,15 @@ var createEnemies = function() {
   });
 };
 
-var enemyData = createEnemies();
+
 
 var render = function(enemyData){
   var enemies = gameBoard.selectAll("circle.enemy")
                 .data(enemyData, function(d) {return d.id});
+
+  enemies.transition().duration(750)
+         .attr('cx', function(d){return d.x})
+         .attr('cy', function(d){return d.y});
 
   enemies.enter()
          .append('svg:circle')
@@ -36,7 +40,12 @@ var render = function(enemyData){
          .attr('cy', function(d){return d.y})
          .attr('r', 10);
 
- enemies.exit().remove();
+ // enemies.exit().remove();
 };
 
-render(enemyData);
+setInterval(function() {
+  var enemyData = createEnemies();
+  render(enemyData);
+}, 1000);
+
+
