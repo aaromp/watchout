@@ -1,12 +1,98 @@
 // start slingin' some d3 here.
 
 var gameOptions = {
-  'height': 450,
-  'width': 700,
-  'nEnemies' : 10
+  'height': 500,
+  'width': 800,
+  'nEnemies' : 30,
+  'padding' : 20
 };
 
-var path = "m313,167c-4,0 -5,0 -8,0c-6,0 -10,0 -16,0c-6,0 -10.22937,-0.66801 -14,1c-3.29733,1.45863 -7.07278,2.8819 -12,6c-3.04672,1.92807 -5.61066,5.15927 -7,8c-1.58411,3.23892 -3.98692,4.75711 -5,11c-0.48055,2.96126 -1.16042,7.96329 -2,12c-1.23863,5.95532 -1,11 -1,17c0,7 0,9 0,12c0,3 1.31021,5.71899 4,9c2.28587,2.78833 5,8 9,12c4,4 7.46356,8.72507 14,13c5.61414,3.67172 11.93533,8.55228 23,15c9.30563,5.42267 21.79025,6.99023 29,8c8.91299,1.24832 16.09732,1.46005 27,0c11.30087,-1.5134 19.93002,-4.01248 28,-9c3.60901,-2.2305 11.22272,-6.724 15,-10c3.20511,-2.77979 3.655,-6.78549 5,-12c2.01361,-7.80675 1,-14 1,-20c0,-6 -2.26404,-12.45021 -8,-21c-3.56735,-5.31734 -10.22769,-9.69566 -17,-15c-7.25821,-5.68492 -13.11954,-6.77196 -19,-10c-5.11145,-2.80591 -9,-3 -12,-3c-3,0 -9,0 -12,0c-3,0 -5.90778,0.49623 -10,1c-0.99249,0.12218 -4.11832,1.52814 -5,2c-3.17892,1.70131 -3.71411,5.21167 -6,8c-0.89661,1.09367 -3.4588,2.69344 -4,4c-0.76538,1.84776 -0.85196,4.22836 -2,7c-0.5412,1.30656 -3,4 -3,5c0,5 0,8 0,12c0,4 1.75531,7.132 4,11c1.80972,3.11848 4.7695,6.39099 7,10c1.66251,2.68999 4.513,6.59399 6,9c1.66251,2.69 5,6 6,6c4,0 9,2 12,2c6,0 8,0 13,0c1,0 4.61105,-0.92807 7,-3c1.68924,-1.46509 1.95517,-3.54916 3,-7c0.86935,-2.87128 0,-7 0,-10c0,-3 0.57956,-6.08582 0,-8c-1.04483,-3.45085 -2.87766,-4.06601 -4,-6c-1.80972,-3.11848 -1.54916,-3.95517 -5,-5c-1.91418,-0.57957 -2.69345,-2.4588 -4,-3c-1.84775,-0.76537 -3,0 -5,0c-2,0 -5,0 -6,0c-3,0 -5,0 -6,0c-2,0 -1.29291,0.29289 -2,1c-1.41422,1.41422 -2,1 -2,2c0,1 0,2 0,2c0,1 0,2 0,3c0,2 -0.70709,2.29289 0,3c1.41422,1.41422 2.29291,0.29289 3,1c0.70709,0.70711 2,1 2,1c1,0 2.07611,0.61731 3,1c1.30655,0.5412 2,1 3,1c1,0 1,1 2,1l0,1";
+var Player = function(gameOptions){
+  this.path = "m-7.5,1.62413c0,-5.04095 4.08318,-9.12413 9.12414,-9.12413c5.04096,0 9.70345,5.53145 11.87586,9.12413c-2.02759,2.72372 -6.8349,9.12415 -11.87586,9.12415c-5.04096,0 -9.12414,-4.08318 -9.12414,-9.12415z";
+  this.fill = '#ff6600';
+  this.x = 0;
+  this.y = 0;
+  this.angle = 0;
+  this.r = 10;
+  this.gameOptions = gameOptions;
+  this.el = d3.selectAll('circle.player');
+
+};
+
+Player.prototype.render = function(gameBoard){
+  this.el = gameBoard.append('svg:circle')
+            .attr('class','player')
+            // .attr('d', this.path)
+            .attr('cx', this.x)
+            .attr('cy', this.y)
+            .attr('r', this.r)
+            .attr('fill', this.fill);
+            //.attr('fill', this.fill);
+            //
+  this.transform(this.gameOptions.width/2, this.gameOptions.width/2);
+  this.setupDragging();
+};
+
+Player.prototype.transform = function(x, y) {
+  // console.log(this.el);
+  x = x || this.x;
+  y = y || this.y;
+  this.setX(x);
+  this.setY(y);
+
+
+  this.el.attr('cx', this.gameOptions.width/2)
+         .attr('cy', this.gameOptions.height/2);
+};
+
+Player.prototype.getX = function(){
+  return this.x;
+};
+
+Player.prototype.getY = function(){
+  return this.y;
+};
+
+Player.prototype.setX = function(x){
+  var minX = this.gameOptions.padding;
+  var maxX = this.gameOptions.width - this.gameOptions.padding;
+
+  if (this.x >= minX && this.x <= maxX) {
+    this.x = x;
+  }
+};
+
+Player.prototype.setY = function(y){
+  var minY = this.gameOptions.padding;
+  var maxY = this.gameOptions.height - this.gameOptions.padding;
+
+  if (this.y >= minY && this.x <= maxY) {
+    this.y = y;
+  }
+};
+
+Player.prototype.move = function(dx, dy) {
+  // console.log(dx, dy);
+
+  this.setX(this.getX() + dx);
+  this.setY(this.getY() + dy);
+  this.el.attr('transform', 'translate('+this.getX()+', '+this.getY()+')');
+};
+
+Player.prototype.setupDragging = function() {
+
+
+  // var drag = d3.behavior.drag().on('drag', function() {
+  //   console.log(this);
+  //   this.setX(this.getX() + d3.event.dx);
+  //   this.setY(this.getY() + d3.event.dy);
+  //   // this.move(d3.event.dx, d3.event.dy);
+  // });
+
+  // this.el.call();
+};
+
+var path = 'm-7.5,1.62413c0,-5.04095 4.08318,-9.12413 9.12414,-9.12413c5.04096,0 9.70345,5.53145 11.87586,9.12413c-2.02759,2.72372 -6.8349,9.12415 -11.87586,9.12415c-5.04096,0 -9.12414,-4.08318 -9.12414,-9.12415z';
 
 var gameBoard = d3.select('body').append('svg')
                   .attr('width', gameOptions.width)
@@ -23,8 +109,6 @@ var createEnemies = function() {
   });
 };
 
-
-
 var render = function(enemyData){
   var enemies = gameBoard.selectAll("circle.enemy")
                 .data(enemyData, function(d) {return d.id});
@@ -40,8 +124,11 @@ var render = function(enemyData){
          .attr('cy', function(d){return d.y})
          .attr('r', 10);
 
- // enemies.exit().remove();
+ enemies.exit().remove();
 };
+
+var player = new Player(gameOptions);
+player.render(gameBoard);
 
 setInterval(function() {
   var enemyData = createEnemies();
